@@ -80,6 +80,8 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito-Regular",
     fontSize: 14,
     flexGrow: 1,
+    width: 80,
+    maxWidth: "100%",
   },
   focused: {
     borderColor: colors.lightGray,

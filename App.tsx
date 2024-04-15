@@ -50,7 +50,7 @@ export default function App() {
               name="Home"
               component={HomeScreen}
               options={{
-                tabBarIcon: ({ color, size, focused }) => (
+                tabBarIcon: ({ focused }) => (
                   <HomeVector
                     color={focused ? colors.primary : colors.lightGray}
                   />

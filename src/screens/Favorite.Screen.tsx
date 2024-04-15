@@ -16,7 +16,7 @@ import { CommonStyles } from "../themes/common";
 import { screenWidth } from "../themes/consts.styles";
 import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import fetchSongs from "../api/songs.api";
+import { fetchSongs } from "../api/songs.api";
 import Loading from "../components/Loading";
 
 export const FavoriteScreen = () => {
@@ -49,10 +49,29 @@ export const FavoriteScreen = () => {
     );
   };
 
+  const navigation = useNavigation<any>();
+
+  const onCardPress = (
+    title: string,
+    url: string,
+    singer: string,
+    duration: number
+  ): void => {
+    navigation.navigate("Music", { title, url, singer, duration });
+  };
+
   const renderItems = ({ item }: { item: any }) => {
     return (
       <Card
         size="l"
+        onPress={() =>
+          onCardPress(
+            item.title,
+            item.artist.picture_big,
+            item.artist.name,
+            item.duration
+          )
+        }
         url={item.artist.picture_big}
         style={{ width: "100%" }}
         imageStyle={{ width: cardWidth }}
@@ -90,7 +109,11 @@ export const FavoriteScreen = () => {
           estimatedItemSize={50}
           data={songs}
           renderItem={({ item: { artist } }: { item: any }) => (
-            <Card size="l" url={artist.picture_big} />
+            <Card
+              size="l"
+              url={artist.picture_big}
+              onPress={() => onCardPress}
+            />
           )}
           horizontal
           ItemSeparatorComponent={() => (

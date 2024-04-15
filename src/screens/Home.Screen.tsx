@@ -16,7 +16,7 @@ import { Input } from "../components/Input";
 import { Card, ICard } from "../components/Card";
 import { FlashList } from "@shopify/flash-list";
 import { CommonStyles } from "../themes/common";
-import fetchSongs from "../api/songs.api";
+import { fetchSongs } from "../api/songs.api";
 import { useNavigation } from "@react-navigation/native";
 import Loading from "../components/Loading";
 
@@ -42,6 +42,17 @@ export const HomeScreen = () => {
     }
   };
 
+  const navigation = useNavigation<any>();
+
+  const onCardPress = (
+    title: string,
+    url: string,
+    singer: string,
+    duration: number
+  ): void => {
+    navigation.navigate("Music", { title, url, singer, duration });
+  };
+
   const renderVerticalCards = ({
     item,
     index,
@@ -49,12 +60,15 @@ export const HomeScreen = () => {
     item: any;
     index: number;
   }) => {
-    const { title, picture_big, artist } = item;
+    const { title, artist, duration } = item;
     return (
       <Card
         size="s"
         key={index}
         horizontal
+        onPress={() =>
+          onCardPress(title, artist.picture_big, artist.name, duration)
+        }
         title={title}
         url={artist.picture_big}
         singer={artist.name}
@@ -65,7 +79,19 @@ export const HomeScreen = () => {
 
   const renderCards = ({ item, index }: { item: any; index: number }) => {
     return (
-      <Card key={index} title={item.title} url={item.artist.picture_big} />
+      <Card
+        key={index}
+        onPress={() =>
+          onCardPress(
+            item.title,
+            item.artist.picture_big,
+            item.artist.name,
+            item.duration
+          )
+        }
+        title={item.title}
+        url={item.artist.picture_big}
+      />
     );
   };
 

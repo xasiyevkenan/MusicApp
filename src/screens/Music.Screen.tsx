@@ -10,7 +10,6 @@ import RepeatVector from "../../assets/vectors/repeat.svg";
 import SkipBackVector from "../../assets/vectors/skip_back.svg";
 import SkipForwardVector from "../../assets/vectors/skip_forward.svg";
 import { colors } from "../themes/colors";
-import { songs } from "../mocks/songs.mock";
 import { ProgressBar } from "../components/ProgressBar";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
@@ -24,6 +23,15 @@ export const MusicScreen: React.FC = () => {
   const handleRightPress = () => {
     navigation.navigate("Favorite");
   };
+  const route = useRoute();
+
+  const {
+    title,
+    url,
+    singer,
+    duration,
+  }: { title: string; url: string; singer: string; duration: number } =
+    route.params as any;
 
   const HeaderLeft = () => {
     const handleBackPress = () => {
@@ -75,16 +83,16 @@ export const MusicScreen: React.FC = () => {
           <Image
             resizeMode="cover"
             source={{
-              uri: songs[0].url,
+              uri: url,
             }}
             style={styles.image}
           />
           <View style={styles.imageTexts}>
-            <Text style={styles.title}>{songs[0].title}</Text>
-            <Text style={styles.singer}>{songs[0].singer}</Text>
+            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.singer}>{singer}</Text>
           </View>
           <View style={styles.controllers}>
-            <ProgressBar time={185} currentTime={120} />
+            <ProgressBar time={duration} currentTime={40} />
             <View style={styles.buttons}>
               <ShuffleVector color={colors.white} />
               <SkipBackVector color={colors.white} />
