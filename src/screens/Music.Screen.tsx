@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, Pressable, Image } from "react-native";
-import React, { useRef, useState } from "react";
+import { View, Text, StyleSheet, Pressable, Image, Alert } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
 import { Header } from "../components/Header";
 import LikeVector from "../../assets/vectors/like.svg";
 import BackVector from "../../assets/vectors/back.svg";
@@ -12,6 +12,7 @@ import SkipForwardVector from "../../assets/vectors/skip_forward.svg";
 import { colors } from "../themes/colors";
 import { ProgressBar } from "../components/ProgressBar";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { Audio } from "expo-av";
 
 export const MusicScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -23,6 +24,7 @@ export const MusicScreen: React.FC = () => {
   const handleRightPress = () => {
     navigation.navigate("Favorite");
   };
+
   const route = useRoute();
 
   const {
@@ -30,8 +32,62 @@ export const MusicScreen: React.FC = () => {
     url,
     singer,
     duration,
-  }: { title: string; url: string; singer: string; duration: number } =
-    route.params as any;
+    audio,
+  }: {
+    title: string;
+    url: string;
+    singer: string;
+    duration: number;
+    audio: string;
+  } = route.params as any;
+
+  const audioPlayer = useRef<Audio.Sound | null>(null);
+  const [play, setPlay] = useState<boolean>(false);
+  const [currentTime, setCurrentTime] = useState<number>(0);
+
+  useEffect(() => {
+    if (audioPlayer.current) {
+      audioPlayer.current.unloadAsync();
+      audioPlayer.current = null;
+    }
+    setPlay(false);
+    setCurrentTime(0);
+  }, [audio]);
+
+  useEffect(() => {
+    const updateCurrentTime = async () => {
+      if (audioPlayer.current) {
+        const status = await audioPlayer.current.getStatusAsync();
+        if (status.isLoaded) {
+          setCurrentTime(status.positionMillis / 1000);
+        }
+      }
+    };
+
+    const intervalId = setInterval(updateCurrentTime, 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const handlePlay = async (song: string) => {
+    try {
+      if (audioPlayer.current) {
+        play
+          ? await audioPlayer.current.pauseAsync()
+          : await audioPlayer.current.playAsync();
+        setPlay(!play);
+      } else {
+        const { sound: createdSound } = await Audio.Sound.createAsync({
+          uri: song,
+        });
+        audioPlayer.current = createdSound;
+        await createdSound.playAsync();
+        setPlay(true);
+      }
+    } catch (error) {
+      console.error("Error: ", error);
+    }
+  };
 
   const HeaderLeft = () => {
     const handleBackPress = () => {
@@ -51,23 +107,6 @@ export const MusicScreen: React.FC = () => {
         <LikeVector color={colors.gray} />
       </Pressable>
     );
-  };
-
-  const audioPlayer = useRef<null>(null);
-  const [play, setPlay] = useState<boolean>(false);
-
-  const onController = () => {
-    // do stuff
-    // audioPlayer.current?.playAsync();
-    // audioPlayer.current?.pauseAsync();
-
-    if (play) {
-      // audioPlayer.current?.pauseAsync();
-    } else {
-      // audioPlayer.current?.playAsync();
-    }
-
-    setPlay((state) => !state);
   };
 
   return (
@@ -92,11 +131,11 @@ export const MusicScreen: React.FC = () => {
             <Text style={styles.singer}>{singer}</Text>
           </View>
           <View style={styles.controllers}>
-            <ProgressBar time={duration} currentTime={40} />
+            <ProgressBar time={duration} currentTime={currentTime} />
             <View style={styles.buttons}>
               <ShuffleVector color={colors.white} />
               <SkipBackVector color={colors.white} />
-              <Pressable onPress={onController} style={styles.pause}>
+              <Pressable onPress={() => handlePlay(audio)} style={styles.pause}>
                 {play ? (
                   <PauseVector color={colors.white} />
                 ) : (

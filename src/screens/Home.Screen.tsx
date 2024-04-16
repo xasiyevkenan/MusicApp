@@ -5,7 +5,7 @@ import {
   StyleSheet,
   ScrollView,
 } from "react-native";
-import React, { useEffect, useState, useSyncExternalStore } from "react";
+import React, { useEffect, useState } from "react";
 import { Avatar } from "../components/Avatar";
 import { Header } from "../components/Header";
 import RingVector from "../../assets/vectors/ring.svg";
@@ -20,10 +20,12 @@ import { fetchSongs } from "../api/songs.api";
 import { useNavigation } from "@react-navigation/native";
 import Loading from "../components/Loading";
 
-export const HomeScreen = () => {
+export const HomeScreen: React.FC = () => {
   const [value, setValue] = useState<string>("");
   const [songs, setSongs] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
+
+  const navigation = useNavigation<any>();
 
   useEffect(() => {
     fetchData();
@@ -42,15 +44,20 @@ export const HomeScreen = () => {
     }
   };
 
-  const navigation = useNavigation<any>();
-
   const onCardPress = (
-    title: string,
-    url: string,
-    singer: string,
-    duration: number
+    title?: string,
+    url?: string,
+    singer?: string,
+    duration?: number,
+    audio?: string
   ): void => {
-    navigation.navigate("Music", { title, url, singer, duration });
+    navigation.navigate("Music", {
+      title,
+      url,
+      singer,
+      duration,
+      audio,
+    });
   };
 
   const renderVerticalCards = ({
@@ -60,14 +67,14 @@ export const HomeScreen = () => {
     item: any;
     index: number;
   }) => {
-    const { title, artist, duration } = item;
+    const { title, artist, duration, preview } = item;
     return (
       <Card
         size="s"
         key={index}
         horizontal
         onPress={() =>
-          onCardPress(title, artist.picture_big, artist.name, duration)
+          onCardPress(title, artist.picture_big, artist.name, duration, preview)
         }
         title={title}
         url={artist.picture_big}
@@ -86,7 +93,8 @@ export const HomeScreen = () => {
             item.title,
             item.artist.picture_big,
             item.artist.name,
-            item.duration
+            item.duration,
+            item.preview
           )
         }
         title={item.title}

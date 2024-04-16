@@ -19,8 +19,10 @@ import { FlashList } from "@shopify/flash-list";
 import { fetchSongs } from "../api/songs.api";
 import Loading from "../components/Loading";
 
-export const FavoriteScreen = () => {
+export const FavoriteScreen: React.FC = () => {
   const [songs, setSongs] = useState<any>(null);
+
+  const navigation = useNavigation<any>();
 
   useEffect(() => {
     fetchData();
@@ -36,11 +38,7 @@ export const FavoriteScreen = () => {
   };
 
   const HeaderLeft = () => {
-    const navigation = useNavigation();
-
-    const handleBackPress = () => {
-      navigation.goBack();
-    };
+    const handleBackPress = () => navigation.goBack();
 
     return (
       <Pressable onPress={handleBackPress}>
@@ -49,15 +47,20 @@ export const FavoriteScreen = () => {
     );
   };
 
-  const navigation = useNavigation<any>();
-
   const onCardPress = (
-    title: string,
-    url: string,
-    singer: string,
-    duration: number
+    title?: string,
+    url?: string,
+    singer?: string,
+    duration?: number,
+    audio?: string
   ): void => {
-    navigation.navigate("Music", { title, url, singer, duration });
+    navigation.navigate("Music", {
+      title,
+      url,
+      singer,
+      duration,
+      audio,
+    });
   };
 
   const renderItems = ({ item }: { item: any }) => {
@@ -69,7 +72,8 @@ export const FavoriteScreen = () => {
             item.title,
             item.artist.picture_big,
             item.artist.name,
-            item.duration
+            item.duration,
+            item.preview
           )
         }
         url={item.artist.picture_big}
@@ -108,11 +112,23 @@ export const FavoriteScreen = () => {
         <FlashList
           estimatedItemSize={50}
           data={songs}
-          renderItem={({ item: { artist } }: { item: any }) => (
+          renderItem={({
+            item: { title, artist, preview, duration },
+          }: {
+            item: any;
+          }) => (
             <Card
               size="l"
               url={artist.picture_big}
-              onPress={() => onCardPress}
+              onPress={() =>
+                onCardPress(
+                  title,
+                  artist.picture_big,
+                  artist.name,
+                  duration,
+                  preview
+                )
+              }
             />
           )}
           horizontal
